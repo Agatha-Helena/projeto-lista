@@ -12,6 +12,9 @@ Projeto direcionado a matéria de 'Projetos'. Nosso projeto conta com a expectat
 - VS Code (Ambiente de codificação);
 - Claude (Ferramenta de IA);
 
+## Nova ideia - incompleta
+Colocar opções de colocar cores respectivo as matérias, proporcionando mais agilidade e velocidade. As cores apareceriam assim que uma nova tarefa estivesse sendo adicionada.
+
 ## Integrantes
 - Agatha Helena Silva Monteiro (Nº 01)
 - Yasmin Vitória do Nascimento Ramos (Nº 31)
