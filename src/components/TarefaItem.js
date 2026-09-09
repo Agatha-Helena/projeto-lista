@@ -152,9 +152,15 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 // Componente responsável por renderizar UM item da lista de tarefas.
 // Recebe a tarefa e três funções (callbacks) vindas do componente pai (a screen)
 // para avisar quando o usuário quer concluir, editar ou excluir essa tarefa.
+// Cor de fallback para tarefas antigas, salvas antes de existir o campo "materia".
+const COR_PADRAO = "#9E9E9E";
+
 export default function TarefaItem({ tarefa, aoAlternarConcluida, aoExcluir, aoEditar }) {
+  const corMateria = tarefa.materia?.cor ?? COR_PADRAO;
+  const nomeMateria = tarefa.materia?.nome ?? "Outros";
+
   return (
-    <View style={styles.item}>
+    <View style={[styles.item, { borderLeftColor: corMateria }]}>
       {/* Ao tocar no texto, a tarefa alterna entre concluída/pendente */}
       <TouchableOpacity
         style={styles.textoContainer}
@@ -163,6 +169,10 @@ export default function TarefaItem({ tarefa, aoAlternarConcluida, aoExcluir, aoE
         <Text style={[styles.texto, tarefa.concluida && styles.textoConcluido]}>
           {tarefa.texto}
         </Text>
+        <View style={styles.materiaContainer}>
+          <View style={[styles.materiaBolinha, { backgroundColor: corMateria }]} />
+          <Text style={styles.materiaTexto}>{nomeMateria}</Text>
+        </View>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -189,6 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#fff',
     borderRadius: 8,
+    borderLeftWidth: 6,
     paddingVertical: 12,
     paddingHorizontal: 14,
     marginBottom: 10,
@@ -202,6 +213,21 @@ const styles = StyleSheet.create({
   textoContainer: {
     flex: 1,
     marginRight: 10,
+  },
+  materiaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  materiaBolinha: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 5,
+  },
+  materiaTexto: {
+    fontSize: 11,
+    color: '#777',
   },
   texto: {
     fontSize: 16,

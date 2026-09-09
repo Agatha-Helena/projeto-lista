@@ -270,6 +270,23 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CHAVE_STORAGE = "@rn-storage-lesson:tarefas";
 
+// Lista de matérias disponíveis e a cor associada a cada uma.
+// O último item ("Outros") é usado como valor padrão.
+const MATERIAS = [
+  { nome: "Biologia", cor: "#A5D6A7" },
+  { nome: "Matemática", cor: "#FFA726" },
+  { nome: "Língua Portuguesa", cor: "#64B5F6" },
+  { nome: "Química", cor: "#2E7D32" },
+  { nome: "Física", cor: "#FFEE58" },
+  { nome: "Artes", cor: "#AB47BC" },
+  { nome: "Inglês", cor: "#1565C0" },
+  { nome: "Geografia", cor: "#795548" },
+  { nome: "História", cor: "#26C6DA" },
+  { nome: "Outros", cor: "#9E9E9E" },
+];
+
+const MATERIA_PADRAO = MATERIAS[MATERIAS.length - 1];
+
 export default function ListaTarefasScreen() {
   const [tarefas, setTarefas] = useState([]);
   const [textoInput, setTextoInput] = useState("");
@@ -278,6 +295,10 @@ export default function ListaTarefasScreen() {
   // Guarda o id da tarefa que está sendo editada.
   // Enquanto for null, o formulário está em modo "adicionar".
   const [idEmEdicao, setIdEmEdicao] = useState(null);
+
+  // Matéria/cor escolhida no formulário (para a tarefa que está sendo
+  // criada ou editada no momento).
+  const [materiaSelecionada, setMateriaSelecionada] = useState(MATERIA_PADRAO);
 
   useEffect(() => {
     async function carregarTarefas() {
@@ -312,10 +333,12 @@ export default function ListaTarefasScreen() {
     if (texto === "") return;
 
     if (idEmEdicao !== null) {
-      // Modo edição: atualiza o texto da tarefa existente
+      // Modo edição: atualiza o texto e a matéria da tarefa existente
       setTarefas((tarefasAtuais) =>
         tarefasAtuais.map((tarefa) =>
-          tarefa.id === idEmEdicao ? { ...tarefa, texto } : tarefa,
+          tarefa.id === idEmEdicao
+            ? { ...tarefa, texto, materia: materiaSelecionada }
+            : tarefa,
         ),
       );
       setIdEmEdicao(null);
@@ -325,11 +348,13 @@ export default function ListaTarefasScreen() {
         id: Date.now().toString(),
         texto,
         concluida: false,
+        materia: materiaSelecionada,
       };
       setTarefas((tarefasAtuais) => [...tarefasAtuais, novaTarefa]);
     }
 
     setTextoInput("");
+    setMateriaSelecionada(MATERIA_PADRAO);
   }
 
   // Chamada quando o usuário toca em "Editar" num item da lista.
@@ -339,12 +364,16 @@ export default function ListaTarefasScreen() {
     if (!tarefa) return;
 
     setTextoInput(tarefa.texto);
+    // Tarefas antigas (salvas antes dessa funcionalidade existir) podem não
+    // ter "materia" salva — nesse caso, cai no padrão "Outros".
+    setMateriaSelecionada(tarefa.materia ?? MATERIA_PADRAO);
     setIdEmEdicao(id);
   }
 
   function cancelarEdicao() {
     setIdEmEdicao(null);
     setTextoInput("");
+    setMateriaSelecionada(MATERIA_PADRAO);
   }
 
   function alternarConcluida(id) {
@@ -398,6 +427,35 @@ export default function ListaTarefasScreen() {
         </TouchableOpacity>
       </View>
 
+      {textoInput.trim() !== "" && (
+        <View style={styles.seletorMaterias}>
+          <Text style={styles.rotuloSeletor}>Matéria:</Text>
+          <View style={styles.chipsContainer}>
+            {MATERIAS.map((materia) => {
+              const selecionada = materia.nome === materiaSelecionada.nome;
+              return (
+                <TouchableOpacity
+                  key={materia.nome}
+                  style={[
+                    styles.chip,
+                    selecionada && {
+                      borderColor: materia.cor,
+                      backgroundColor: "#f2f2f2",
+                    },
+                  ]}
+                  onPress={() => setMateriaSelecionada(materia)}
+                >
+                  <View
+                    style={[styles.chipBolinha, { backgroundColor: materia.cor }]}
+                  />
+                  <Text style={styles.chipTexto}>{materia.nome}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      )}
+
       {emModoEdicao && (
         <TouchableOpacity onPress={cancelarEdicao} style={styles.linkCancelar}>
           <Text style={styles.textoLinkCancelar}>Cancelar edição</Text>
@@ -422,7 +480,7 @@ export default function ListaTarefasScreen() {
         }
         contentContainerStyle={styles.listaConteudo}
       />
-    
+
       {tarefas.length >= 2 && (
         <View>
           <TouchableOpacity style={styles.botaoExcluir} onPress={excluirTudo}>
@@ -466,6 +524,43 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     justifyContent: "center",
+  },
+  seletorMaterias: {
+    marginBottom: 14,
+  },
+  rotuloSeletor: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#555",
+    marginBottom: 6,
+  },
+  chipsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  chipBolinha: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 6,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.15)",
+  },
+  chipTexto: {
+    fontSize: 12,
+    color: "#333",
   },
   linkCancelar: {
     alignSelf: "flex-end",
